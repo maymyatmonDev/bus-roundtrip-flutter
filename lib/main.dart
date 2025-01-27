@@ -1,3 +1,4 @@
+import 'package:bus_roundtrip_flutter/pages/bus_home.dart';
 import 'package:bus_roundtrip_flutter/pages/bus_result.dart';
 import 'package:bus_roundtrip_flutter/pages/home.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
         title: 'Bus Roundtrip',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(fontFamily: 'Poppins'),
-        home: BusResult());
+        home: BusSearchHome());
+    // home: BusResult());
   }
 }

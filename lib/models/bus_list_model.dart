@@ -68,6 +68,21 @@ class BusListModel {
         to: 'Mandalay',
         toTime: '10:00 PM',
         duration: '2h 30m'));
+
+    busList.add(BusListModel(
+        operatorName: 'Mann Shwe Myoe Taw',
+        logo: 'assets/icons/buslogo.png',
+        rating: 4,
+        review: '1200',
+        seats: '23',
+        gates: 'Yangon-Meiktila-Mandalay',
+        price: '22000',
+        date: 'Sun, Aug 11 2024',
+        from: 'Yangon',
+        fromTime: '6:00 AM',
+        to: 'Mandalay',
+        toTime: '9:00 PM',
+        duration: '2h 30m'));
     return busList;
   }
 }

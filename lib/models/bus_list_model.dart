@@ -36,53 +36,72 @@ class BusListModel {
     return 'BusListModel(operatorName: $operatorName, logo: $logo, rating: $rating, review: $review, seats: $seats, gates: $gates)';
   }
 
-  static List<BusListModel> getBusList() {
-    List<BusListModel> busList = [];
+  // static List<BusListModel> getBusList() {
+  //   List<BusListModel> busList = [];
 
-    busList.add(BusListModel(
-        operatorName: 'Mann Shwe Myoe Taw',
-        logo: 'assets/icons/buslogo.png',
-        rating: 4,
-        review: '1200',
-        seats: '23',
-        gates: 'Yangon-Meiktila-Mandalay',
-        price: '22000',
-        date: 'Sun, Aug 11 2024',
-        from: 'Yangon',
-        fromTime: '6:00 AM',
-        to: 'Mandalay',
-        toTime: '9:00 PM',
-        duration: '2h 30m'));
+  //   busList.add(BusListModel(
+  //       operatorName: 'Mann Shwe Myoe Taw',
+  //       logo: 'assets/icons/buslogo.png',
+  //       rating: 4,
+  //       review: '1200',
+  //       seats: '23',
+  //       gates: 'Yangon-Meiktila-Mandalay',
+  //       price: '22000',
+  //       date: 'Sun, Aug 11 2024',
+  //       from: 'Yangon',
+  //       fromTime: '6:00 AM',
+  //       to: 'Mandalay',
+  //       toTime: '9:00 PM',
+  //       duration: '2h 30m'));
 
-    busList.add(BusListModel(
-        operatorName: 'Aung Mingalar',
-        logo: 'assets/icons/buslogo.png',
-        rating: 3,
-        review: '1500',
-        seats: '20',
-        gates: 'Yangon-Kyaukse-Mandalay',
-        price: '24000',
-        date: 'Sun, Aug 11 2024',
-        from: 'Yangon',
-        fromTime: '8:00 AM',
-        to: 'Mandalay',
-        toTime: '10:00 PM',
-        duration: '2h 30m'));
+  //   busList.add(BusListModel(
+  //       operatorName: 'Aung Mingalar',
+  //       logo: 'assets/icons/buslogo.png',
+  //       rating: 3,
+  //       review: '1500',
+  //       seats: '20',
+  //       gates: 'Yangon-Kyaukse-Mandalay',
+  //       price: '24000',
+  //       date: 'Sun, Aug 11 2024',
+  //       from: 'Yangon',
+  //       fromTime: '8:00 AM',
+  //       to: 'Mandalay',
+  //       toTime: '10:00 PM',
+  //       duration: '2h 30m'));
 
-    busList.add(BusListModel(
-        operatorName: 'Mann Shwe Myoe Taw',
-        logo: 'assets/icons/buslogo.png',
-        rating: 4,
-        review: '1200',
-        seats: '23',
-        gates: 'Yangon-Meiktila-Mandalay',
-        price: '22000',
-        date: 'Sun, Aug 11 2024',
-        from: 'Yangon',
-        fromTime: '6:00 AM',
-        to: 'Mandalay',
-        toTime: '9:00 PM',
-        duration: '2h 30m'));
-    return busList;
+  //   busList.add(BusListModel(
+  //       operatorName: 'Mann Shwe Myoe Taw',
+  //       logo: 'assets/icons/buslogo.png',
+  //       rating: 4,
+  //       review: '1200',
+  //       seats: '23',
+  //       gates: 'Yangon-Meiktila-Mandalay',
+  //       price: '22000',
+  //       date: 'Sun, Aug 11 2024',
+  //       from: 'Yangon',
+  //       fromTime: '6:00 AM',
+  //       to: 'Mandalay',
+  //       toTime: '9:00 PM',
+  //       duration: '2h 30m'));
+  //   return busList;
+  // }
+
+  // Factory method to create an instance from JSON
+  factory BusListModel.fromJson(Map<String, dynamic> json) {
+    return BusListModel(
+      operatorName: json['operatorName'],
+      logo: json['logo'],
+      rating: json['rating'].toDouble(), // Ensure it's a double
+      review: json['review'],
+      seats: json['seats'],
+      gates: json['gates'],
+      price: json['price'],
+      date: json['date'],
+      from: json['from'],
+      fromTime: json['fromTime'],
+      to: json['to'],
+      toTime: json['toTime'],
+      duration: json['duration'],
+    );
   }
 }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class BusResult extends StatefulWidget {
   bool? isMyanmarCitizen;
@@ -21,7 +23,6 @@ class BusResult extends StatefulWidget {
     this.passengerCount,
     this.departureDate,
     this.returnDate,
-    // Add other search values here
   });
 
   @override
@@ -39,6 +40,7 @@ class _BusResultState extends State<BusResult> {
   @override
   void initState() {
     super.initState();
+    fetchBusResults();
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
         _isLoading = false;
@@ -56,8 +58,34 @@ class _BusResultState extends State<BusResult> {
     setState(() {}); // Call setState to update the UI
   }
 
-  void _getBusList() {
-    busList = BusListModel.getBusList();
+  // void _getBusList() {
+  //   busList = BusListModel.getBusList();
+  // }
+
+  Future<void> fetchBusResults() async {
+    final url = Uri.parse(
+        'http://localhost:3000/buses?from=${widget.from}&to=${widget.to}&date=${widget.departureDate}'); // Update with your API URL
+    print(
+        'http://localhost:3000/buses?from=${widget.from}&to=${widget.to}&date=${widget.departureDate}'); // Update with your API URL');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+
+        setState(() {
+          busList = data.map((json) => BusListModel.fromJson(json)).toList();
+          // isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load bus results');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+      setState(() {
+        // isLoading = false;
+      });
+    }
   }
 
   void handleSelect(busInfo) {
@@ -86,7 +114,7 @@ class _BusResultState extends State<BusResult> {
 
   @override
   Widget build(BuildContext context) {
-    _getBusList();
+    // _getBusList();
     return Scaffold(
         appBar: appBar(),
         backgroundColor: Colors.white,

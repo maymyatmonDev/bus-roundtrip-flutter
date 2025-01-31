@@ -15,12 +15,19 @@ class _BusSearchHomeState extends State<BusSearchHome> {
   bool isMyanmarCitizen = true;
   String tripType = "Roundtrip"; // Default: Roundtrip
   int passengerCount = 1;
-  DateTime? departureDate = DateTime.now();
-  DateTime? returnDate = DateTime.now();
+  DateTime? departureDate;
+  DateTime? returnDate;
 
   // TextEditingControllers for 'From' and 'To' fields
   final TextEditingController fromController = TextEditingController();
   final TextEditingController toController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    departureDate = DateTime.now();
+    returnDate = departureDate?.add(Duration(days: 1));
+  }
 
   // Method to dispose controllers
   @override

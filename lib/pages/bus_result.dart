@@ -40,13 +40,13 @@ class _BusResultState extends State<BusResult> {
   @override
   void initState() {
     super.initState();
-    fetchBusResults();
+    fetchBusResults(widget.departureDate);
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
         _isLoading = false;
       });
     });
-    currentDate = DateTime.now();
+    currentDate = widget.departureDate;
     prevDate = currentDate?.subtract(Duration(days: 1));
     nextDate = currentDate?.add(Duration(days: 1));
   }
@@ -55,36 +55,34 @@ class _BusResultState extends State<BusResult> {
     currentDate = newDate;
     prevDate = currentDate?.subtract(Duration(days: 1));
     nextDate = currentDate?.add(Duration(days: 1));
-    setState(() {}); // Call setState to update the UI
+    setState(() {
+      fetchBusResults(currentDate);
+    }); // Call setState to update the UI
   }
 
-  // void _getBusList() {
-  //   busList = BusListModel.getBusList();
-  // }
+  void _getBusList() {
+    busList = BusListModel.getBusList();
+  }
 
-  Future<void> fetchBusResults() async {
+  Future<void> fetchBusResults(DateTime? newDate) async {
     final url = Uri.parse(
-        'http://localhost:3000/buses?from=${widget.from}&to=${widget.to}&date=${widget.departureDate}'); // Update with your API URL
-    print(
-        'http://localhost:3000/buses?from=${widget.from}&to=${widget.to}&date=${widget.departureDate}'); // Update with your API URL');
+        'http://localhost:3002/buses?from=${widget.from}&to=${widget.to}&date=${DateFormat('yyyy-MM-dd').format(newDate!)}'); // Update with your API URL
+    // print(
+    //     'http://localhost:3002/buses?from=${widget.from}&to=${widget.to}&date=${widget.departureDate}'); // Update with your API URL');
     try {
       final response = await http.get(url);
-
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-
+        final data = json.decode(response.body);
+        final busResponse = BusResponse.fromJson(data);
         setState(() {
-          busList = data.map((json) => BusListModel.fromJson(json)).toList();
-          // isLoading = false;
+          busList = busResponse.buses.toList();
         });
       } else {
         throw Exception('Failed to load bus results');
       }
     } catch (e) {
       print('Error fetching data: $e');
-      setState(() {
-        // isLoading = false;
-      });
+      setState(() {});
     }
   }
 
@@ -410,211 +408,247 @@ class _BusResultState extends State<BusResult> {
                     SizedBox(
                       height: 25,
                     ),
-                    ListView.separated(
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 25),
-                      itemCount: busList.length,
-                      shrinkWrap: true,
-                      padding: EdgeInsets.only(left: 20, right: 20),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          height: 250,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0xff1D1617).withOpacity(.07),
-                                offset: Offset(0, 10),
-                                blurRadius: 40,
-                                spreadRadius: 0,
+                    busList.length == 0
+                        ? Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.all(20),
+                            child: Text(
+                              'Sorry! No Bus for this routes',
+                              style: TextStyle(
+                                color: Colors.grey,
                               ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 15, top: 15, bottom: 15, right: 5),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Operator Name Section (Full Width)
-                                Row(
-                                  children: [
-                                    Image.asset(
-                                      busList[index].logo ?? '',
-                                      width: 50,
-                                    ),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      busList[index].operatorName ?? '',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black,
-                                      ),
+                            ),
+                          )
+                        : ListView.separated(
+                            separatorBuilder: (context, index) =>
+                                SizedBox(height: 25),
+                            itemCount: busList.length,
+                            shrinkWrap: true,
+                            padding: EdgeInsets.only(left: 20, right: 20),
+                            itemBuilder: (context, index) {
+                              return Container(
+                                height: 250,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color(0xff1D1617).withOpacity(.07),
+                                      offset: Offset(0, 10),
+                                      blurRadius: 40,
+                                      spreadRadius: 0,
                                     ),
                                   ],
                                 ),
-                                SizedBox(
-                                    height: 15), // Space after operator name
-
-                                // Route and Button in a Row
-                                Expanded(
-                                  child: Row(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 15, top: 15, bottom: 15, right: 5),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      // Left Side: Route Details
-                                      Expanded(
-                                        flex: 2,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              '${busList[index].from ?? ''} (${busList[index].fromTime ?? ''})',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                      // Operator Name Section (Full Width)
+                                      Row(
+                                        children: [
+                                          Image.asset(
+                                            busList[index].logo ?? '',
+                                            width: 50,
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            busList[index].operatorName ?? '',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
                                             ),
-                                            SizedBox(height: 5),
-                                            Text(
-                                              busList[index].gates ?? '',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: Color(0xff828282),
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            SizedBox(height: 12),
-                                            Text(
-                                              busList[index].duration ?? '',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Color(0xff4F4F4F),
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            SizedBox(height: 12),
-                                            Text(
-                                              '${busList[index].to ?? ''} (${busList[index].toTime ?? ''})',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            SizedBox(height: 5),
-                                            Text(
-                                              busList[index].gates ?? '',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: Color(0xff828282),
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            SizedBox(height: 20),
-                                            // Rating Stars Section
-                                            Row(
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: List.generate(
-                                                    (busList[index].rating ??
-                                                            0.0)
-                                                        .toInt(), // Use the rating value to generate the correct number of stars
-                                                    (starIndex) {
-                                                      return Image.asset(
-                                                        'assets/icons/star-icon.png',
-                                                        width: 10,
-                                                      );
-                                                    },
-                                                  ),
-                                                ),
-                                                Text(
-                                                  ' (${busList[index].review ?? ''} Reviews) Free Wifi, Aircon',
-                                                  style: TextStyle(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xff4F4F4F),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                      // Vertical Divider between the Route and Button
-                                      Container(
-                                        height:
-                                            100, // Adjust this to control the height of the divider
-                                        width: 1, // Line thickness
-                                        color: Color(0xff707070)
-                                            .withOpacity(.2), // Divider color
-                                      ),
+                                      SizedBox(
+                                          height:
+                                              15), // Space after operator name
 
-                                      // Right Side: Select Button
+                                      // Route and Button in a Row
                                       Expanded(
-                                        flex: 1,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                        child: Row(
                                           children: [
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                SizedBox(height: 45),
-                                                Text(
-                                                  'MMK ${busList[index].price ?? ''}',
-                                                  style: TextStyle(
-                                                      fontSize: 14,
+                                            // Left Side: Route Details
+                                            Expanded(
+                                              flex: 2,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    '${busList[index].from ?? ''} (${busList[index].fromTime ?? ''})',
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.black,
                                                       fontWeight:
                                                           FontWeight.w500,
-                                                      color: Color(0xff00AEEF)),
-                                                ),
-                                                SizedBox(height: 5),
-                                                ElevatedButton(
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Color(0xff00AEEF),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
                                                     ),
-                                                    fixedSize: Size(80, 40),
-                                                    padding: EdgeInsets.zero,
                                                   ),
-                                                  onPressed: () {
-                                                    // Get the busList[index]'s info values
-                                                    dynamic busInfo =
-                                                        busList[index];
-
-                                                    // Call a function to log the values
-                                                    handleSelect(busInfo);
-                                                  },
-                                                  child: Text(
-                                                    'Select',
+                                                  SizedBox(height: 5),
+                                                  Text(
+                                                    busList[index].gates ?? '',
                                                     style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 14),
+                                                      fontSize: 11,
+                                                      color: Color(0xff828282),
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
+                                                  SizedBox(height: 12),
+                                                  Text(
+                                                    busList[index].duration ??
+                                                        '',
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Color(0xff4F4F4F),
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 12),
+                                                  Text(
+                                                    '${busList[index].to ?? ''} (${busList[index].toTime ?? ''})',
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 5),
+                                                  Text(
+                                                    busList[index].gates ?? '',
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      color: Color(0xff828282),
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 20),
+                                                  // Rating Stars Section
+                                                  Row(
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        children: List.generate(
+                                                          (busList[index]
+                                                                      .rating ??
+                                                                  0.0)
+                                                              .toInt(), // Use the rating value to generate the correct number of stars
+                                                          (starIndex) {
+                                                            return Image.asset(
+                                                              'assets/icons/star-icon.png',
+                                                              width: 10,
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        ' (${busList[index].review ?? ''} Reviews) Free Wifi, Aircon',
+                                                        style: TextStyle(
+                                                          fontSize: 10,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color:
+                                                              Color(0xff4F4F4F),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 10),
-                                              child: Text(
-                                                '${busList[index].seats ?? ''} Seats',
-                                                style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.black),
+                                            // Vertical Divider between the Route and Button
+                                            Container(
+                                              height:
+                                                  100, // Adjust this to control the height of the divider
+                                              width: 1, // Line thickness
+                                              color: Color(0xff707070)
+                                                  .withOpacity(
+                                                      .2), // Divider color
+                                            ),
+
+                                            // Right Side: Select Button
+                                            Expanded(
+                                              flex: 1,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      SizedBox(height: 45),
+                                                      Text(
+                                                        'MMK ${busList[index].price ?? ''}',
+                                                        style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            color: Color(
+                                                                0xff00AEEF)),
+                                                      ),
+                                                      SizedBox(height: 5),
+                                                      ElevatedButton(
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          backgroundColor:
+                                                              Color(0xff00AEEF),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8),
+                                                          ),
+                                                          fixedSize:
+                                                              Size(80, 40),
+                                                          padding:
+                                                              EdgeInsets.zero,
+                                                        ),
+                                                        onPressed: () {
+                                                          // Get the busList[index]'s info values
+                                                          dynamic busInfo =
+                                                              busList[index];
+
+                                                          // Call a function to log the values
+                                                          handleSelect(busInfo);
+                                                        },
+                                                        child: Text(
+                                                          'Select',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 14),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            bottom: 10),
+                                                    child: Text(
+                                                      '${busList[index].seats ?? ''} Seats',
+                                                      style: TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color: Colors.black),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
@@ -623,12 +657,9 @@ class _BusResultState extends State<BusResult> {
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    )
+                              );
+                            },
+                          )
                   ],
                 ),
               ]));
